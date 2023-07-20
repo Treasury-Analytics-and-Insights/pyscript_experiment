@@ -37,7 +37,6 @@ def update_groups(event):
 
 pop_selector.param.watch(update_groups, 'value')
 
-
 measure_selector = pn.widgets.Select(
     name='Income Measure', options = data['Income Measure'].unique().tolist())
 
@@ -60,8 +59,11 @@ fig, table_data = fig_table_data(
     income_type_selector.value)
 
 # Plot tab components
-plot_pane = pn.pane.Matplotlib(
-    fig, tight=True, sizing_mode='scale_width', width=1000)
+#plot_pane = pn.pane.Matplotlib(
+#    fig, tight=True, sizing_mode='scale_width', width=1000)
+
+plot_pane = pn.pane.Plotly(fig, sizing_mode='scale_width', width=1000)
+
 with open('idi_disclaimer.md', 'r') as f:
     disclaimer = pn.pane.Markdown(f.read(), width=300)
 plot_download = pn.widgets.FileDownload(
@@ -96,8 +98,9 @@ def update(event):
     fig, table_data = fig_table_data(
         data, pop_selector.value, group_selector.value, measure_selector.value,
         income_type_selector.value)
-    plot_pane.object=fig
     table.value=table_data
+    plot_pane.object=fig
+    
 
 
 go_button.on_click(update)

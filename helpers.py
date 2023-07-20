@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+
 
 
 SUBPLOT_DIMS = {
@@ -31,7 +33,7 @@ def fig_table_data(data, pop_type, groups, income_measure, income_type):
     subset = data[
         (data['Income Type'] == income_type) & (data['Population Type'] == pop_type) & 
         (data.Description.isin(groups)) & (data['Income Measure'] == income_measure)]
-    fig = do_plot(subset, pop_type, groups, income_measure, income_type)
+    fig = do_plotly(subset, pop_type, groups, income_measure, income_type)
     subset=subset.drop('Plot Population', axis=1)
     subset.to_csv('subset_data.csv', index=False)
     return fig, subset
@@ -88,4 +90,32 @@ def do_plot(subset, pop_type, groups, income_measure, income_type):
 
     fig.suptitle(f"{pop_type}: {income_measure}")
     fig.savefig('plot.svg', bbox_inches='tight')
+    return fig
+
+# make a plotly version of the do_plot function
+def do_plotly(subset, pop_type, groups, income_measure, income_type):
+    """Plot the income distribution for the selected population type, groups, 
+    income measure and income type."""
+    fig = go.Figure()
+    # get the max population for each group to set the axis limits
+    for group in groups:
+
+        plot_data = subset[subset.Description == group]
+       
+        # if income_type is Income_band, then make the barplot horizontal
+        if income_type == 'Income Bands':
+            fig.add_trace(go.Bar(
+                y=plot_data['Income Group'], x=plot_data['Plot Population'], 
+                orientation='h', name=group))
+            fig.update_layout(barmode='stack', xaxis_tickformat=',.0f')
+        else:
+            fig.add_trace(go.Bar(
+                x=plot_data['Income Group'], y=plot_data['Plot Population'], 
+                name=group))
+            fig.update_layout(barmode='stack', yaxis_tickformat=',.0f')
+
+    fig.update_layout(
+        title=f"{pop_type}: {income_measure}", 
+        xaxis_title=income_type, yaxis_title='Population')
+    #fig.write_image('plot.svg', width=1000, height=600, scale=1)
     return fig
