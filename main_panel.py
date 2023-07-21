@@ -58,11 +58,9 @@ fig, table_data = fig_table_data(
     data, pop_selector.value, group_selector.value, measure_selector.value,
     income_type_selector.value)
 
-# Plot tab components
-#plot_pane = pn.pane.Matplotlib(
-#    fig, tight=True, sizing_mode='scale_width', width=1000)
-
-plot_pane = pn.pane.Plotly(fig, sizing_mode='scale_width', width=1000)
+# The I couldn't get a Plotly pane to update prolerly when the data changed.
+# using html works, but it is probably slower
+plot_pane = pn.pane.HTML(fig.to_html(), width=1000)
 
 with open('idi_disclaimer.md', 'r') as f:
     disclaimer = pn.pane.Markdown(f.read(), width=300)
@@ -95,12 +93,11 @@ pn.Tabs(
 
 def update(event):
     """Update the plot and table when the Go button is clicked"""
-    fig, table_data = fig_table_data(
+    fig_, table_data = fig_table_data(
         data, pop_selector.value, group_selector.value, measure_selector.value,
         income_type_selector.value)
     table.value=table_data
-    plot_pane.object=fig
-    
+    plot_pane.object=fig_.to_html()   
 
 
 go_button.on_click(update)
